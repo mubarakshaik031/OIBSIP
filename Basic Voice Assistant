@@ -1,0 +1,70 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import webbrowser
+
+# Initialize speech recognition and text-to-speech engines
+recognizer = sr.Recognizer()
+engine = pyttsx3.init()
+
+# Function to speak the given text
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# Function to greet the user
+def greet():
+    speak("Hello! How can I assist you today?")
+
+# Function to get the current time
+def get_time():
+    current_time = datetime.datetime.now().strftime("%H:%M:%S")
+    speak(f"The current time is {current_time}")
+
+# Function to get the current date
+def get_date():
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    speak(f"Today's date is {current_date}")
+
+# Function to search the web
+def search_web(query):
+    url = f"https://www.google.com/search?q={query}"
+    webbrowser.open(url)
+    speak(f"I found some information about {query} on the web.")
+
+# Main loop for the voice assistant
+def main():
+    greet()
+
+    while True:
+        with sr.Microphone() as source:
+            print("Listening...")
+            audio = recognizer.listen(source)
+
+        try:
+            print("Recognizing...")
+            command = recognizer.recognize_google(audio).lower()
+            print("You said:", command)
+
+            if "hello" in command:
+                greet()
+            elif "time" in command:
+                get_time()
+            elif "date" in command:
+                get_date()
+            elif "search" in command:
+                query = command.split("search")[-1].strip()
+                search_web(query)
+            elif "exit" in command or "bye" in command:
+                speak("Goodbye!")
+                break
+            else:
+                speak("I'm sorry, I didn't understand that.")
+
+        except sr.UnknownValueError:
+            print("Could not understand audio.")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
+
+if __name__ == "__main__":
+    main()
